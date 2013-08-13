@@ -36,7 +36,9 @@
             this.numericPoints = new System.Windows.Forms.NumericUpDown();
             this.solversPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonUpload = new System.Windows.Forms.Button();
+            this.tbTotalLength = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.numericPoints)).BeginInit();
+            this.solversPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // bitmapPanel
@@ -111,6 +113,7 @@
             // solversPanel
             // 
             this.solversPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.solversPanel.Controls.Add(this.tbTotalLength);
             this.solversPanel.Location = new System.Drawing.Point(1238, 151);
             this.solversPanel.Name = "solversPanel";
             this.solversPanel.Size = new System.Drawing.Size(134, 450);
@@ -126,6 +129,14 @@
             this.buttonUpload.Text = "Upload";
             this.buttonUpload.UseVisualStyleBackColor = true;
             this.buttonUpload.Click += new System.EventHandler(this.buttonUpload_Click);
+            // 
+            // tbTotalLength
+            // 
+            this.tbTotalLength.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbTotalLength.Location = new System.Drawing.Point(3, 3);
+            this.tbTotalLength.Name = "tbTotalLength";
+            this.tbTotalLength.Size = new System.Drawing.Size(100, 20);
+            this.tbTotalLength.TabIndex = 8;
             // 
             // TestForm
             // 
@@ -144,6 +155,8 @@
             this.Text = "Test App";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             ((System.ComponentModel.ISupportInitialize)(this.numericPoints)).EndInit();
+            this.solversPanel.ResumeLayout(false);
+            this.solversPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -159,6 +172,7 @@
         private System.Windows.Forms.NumericUpDown numericPoints;
         private System.Windows.Forms.FlowLayoutPanel solversPanel;
         private System.Windows.Forms.Button buttonUpload;
+        private System.Windows.Forms.TextBox tbTotalLength;
     }
 }
 

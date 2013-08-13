@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 using Temp;
@@ -7,23 +9,189 @@ namespace vrp
 {
     public class VrpClusteringMethod : VrpSolverBase
     {
+        private const int BaseTimelimit = 3 * 1000;
+
         public override VrpResult Solve(VrpData data)
         {
-            var clusters = GetKmeanClusters(data, data.V);
+            VrpResult bestResult = null;
+            var timelimit = BaseTimelimit;
+            var stopwatch = Stopwatch.StartNew();
 
-            // burn
-            var w = new int[data.V];
-            for (int i = 0; i < data.N; i++)
+            var rnd = new Random();
+
+            var pr = new double[data.V];
+            for (int i = 0; i < data.V; i++)
             {
-                w[clusters.Color[i]] += data.Customers[clusters.Color[i]].Demand;
+                pr[i] = 1D / (data.V - 1);
+            }
+            pr[0] = 0;
+
+            while (true)
+            {
+                stopwatch.Stop();
+                if (bestResult != null && stopwatch.ElapsedMilliseconds > timelimit)
+                {
+                    break;
+                }
+                stopwatch.Start();
+
+                var r = rnd.NextDouble() * pr.Sum();
+                var sum = 0D;
+                var v = 2;
+                for (int i = 0; i < data.V; i++)
+                {
+                    sum += pr[i];
+                    if (sum > r)
+                    {
+                        v = i + 1;
+                        break;
+                    }
+                }
+
+                var baseClusters = GetKmeanClusters(data, v);
+
+                // burn
+                var found = false;
+
+                for (int count = 0; count < 10; count++)
+                {
+                    var clusters = new ClustersModel();
+                    clusters.Color = new int[data.N];
+                    Array.Copy(baseClusters.Color, clusters.Color, data.N);
+                    clusters.Count = new int[v];
+                    Array.Copy(baseClusters.Count, clusters.Count, v);
+                    clusters.Centers = new Point2DReal[v];
+                    for (int i = 0; i < v; i++)
+                    {
+                        clusters.Centers[i] = new Point2DReal(baseClusters.Centers[i]);
+                    }
+
+                    var w = new int[v];
+                    for (int i = 0; i < data.N; i++)
+                    {
+                        w[clusters.Color[i]] += data.Customers[i].Demand;
+                    }
+
+                    var baseOverweight = w.Sum(x => x > data.C ? x - data.C : 0);
+                    var overweight = baseOverweight;
+
+                    var radiuses = new double[v];
+                    for (int i = 0; i < data.N; i++)
+                    {
+                        var color = clusters.Color[i];
+                        var dist = data.Customers[i].Point.Dist(clusters.Centers[color]);
+                        if (dist > radiuses[color])
+                        {
+                            radiuses[color] = dist;
+                        }
+                    }
+                    var baseRadius = radiuses.Sum();
+                    var radius = baseRadius;
+
+                    var E = 1D;
+                    var minE = double.MaxValue;
+
+                    var bestColors = new int[data.N];
+                    var bestW = new int[v];
+                    for (int k = 0; k < 1000; k++)
+                    {
+                        if (E < minE)
+                        {
+                            minE = E;
+                            Array.Copy(clusters.Color, bestColors, data.N);
+                            Array.Copy(w, bestW, v);
+                        }
+
+                        var id = rnd.Next(data.N);
+                        var weight = data.Customers[id].Demand;
+                        var newColor = rnd.Next(v - 1);
+                        var oldColor = clusters.Color[id];
+                        if (oldColor <= newColor)
+                        {
+                            newColor++;
+                        }
+                        var weightDelta = -(w[newColor] + weight > data.C ? w[newColor] + weight - data.C : 0)
+                                          + (w[newColor] > data.C ? w[newColor] - data.C : 0)
+                                          - (w[oldColor] - weight > data.C ? w[oldColor] - weight - data.C : 0)
+                                          + (w[oldColor] > data.C ? w[oldColor] - data.C : 0);
+                        var newOverweight = overweight - weightDelta;
+
+                        var point = data.Customers[id].Point;
+                        var newCenter = (clusters.Centers[newColor] * clusters.Count[newColor] + point)
+                                        * (1D / (clusters.Count[newColor] + 1));
+                        var newDist = point.Dist(newCenter);
+                        var newRadius = radius;
+                        if (newDist > radiuses[newColor])
+                        {
+                            newRadius += newDist - radiuses[newColor];
+                        }
+
+                        var newE = (double)newOverweight / baseOverweight + 3 * (newRadius - baseRadius) / baseRadius;
+
+                        var alpha = rnd.NextDouble();
+
+                        var T = 10 / (k + 1);
+                        var h = Math.Exp(-(newE - E) / T);
+                        if (alpha < h)
+                        {
+                            E = newE;
+                            overweight = newOverweight;
+                            radius = newRadius;
+                            w[newColor] += weight;
+                            w[oldColor] -= weight;
+                            clusters.Color[id] = newColor;
+                            clusters.Centers[newColor] = newCenter;
+                            clusters.Centers[oldColor] = (clusters.Centers[oldColor] * clusters.Count[oldColor] - point)
+                                                         * (1D / (clusters.Count[oldColor] - 1));
+                            clusters.Count[newColor]++;
+                            clusters.Count[oldColor]--;
+                            if (newDist > radiuses[newColor])
+                            {
+                                radiuses[newColor] = newDist;
+                            }
+                        }
+                    }
+
+
+                    if (bestW.All(x => x <= data.C))
+                    {
+                        found = true;
+                        baseClusters.Color = bestColors;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    pr[v - 1] /= 2;
+                    continue;
+                }
+
+                var result = new VrpResult();
+                result.Routes = new List<int>[data.V];
+                for (int i = 0; i < data.V; i++)
+                {
+                    result.Routes[i] = new List<int> { 0 };
+                }
+                for (int i = 1; i < data.N; i++)
+                {
+                    result.Routes[baseClusters.Color[i]].Add(i);
+                }
+                for (int i = 0; i < data.V; i++)
+                {
+                    result.Routes[i].Add(0);
+                }
+
+                ApplyTsp(data, result);
+                CalcTotalDist(data, result);
+
+                if (bestResult == null || bestResult.Dist > result.Dist)
+                {
+                    bestResult = result;
+                }
             }
 
-            throw new NotImplementedException();
-
-            while (w.Any(x => x > data.C))
-            {
-                
-            }
+            return bestResult;
         }
 
         public ClustersModel GetKmeanClusters(VrpData data, int clustersCount)

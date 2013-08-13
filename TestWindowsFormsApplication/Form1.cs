@@ -26,7 +26,9 @@ namespace TestWindowsFormsApplication
         private Color[] _colors = new[] { Color.Red, Color.Blue, Color.Green, Color.Orange, Color.Brown, Color.CornflowerBlue, Color.GreenYellow };
 
         private VrpData _vrpData; 
-        private VrpResult _vrpResult; 
+        private VrpResult _vrpResult;
+
+        private readonly IVrpSolver _solver = new VrpClusteringMethod();
 
         public TestForm()
         {
@@ -72,8 +74,7 @@ namespace TestWindowsFormsApplication
                 return;
             }
 
-            var solver = new SimpleVrpSolver();
-            _vrpResult = solver.Solve(_vrpData);
+            _vrpResult = _solver.Solve(_vrpData);
         }
 
         private void RefreshDraw()
@@ -96,13 +97,19 @@ namespace TestWindowsFormsApplication
                 }
             }
 
-            var maxDemand = _vrpData.Customers.Max(c => c.Demand);
+            double maxDemand = Math.Sqrt(_vrpData.Customers.Max(c => c.Demand));
             foreach (var customer in _vrpData.Customers)
             {
-                DrawPoint(customer.Point.X, customer.Point.Y, g, 10 * customer.Demand / maxDemand);
+                DrawPoint(customer.Point.X, customer.Point.Y, g, (int)(10 * Math.Sqrt(customer.Demand) / maxDemand) + 1);
+                if (customer.Demand == 0)
+                {
+                    continue;
+                }
+                g.DrawString(customer.Demand.ToString(), new Font("Arial", 16), new SolidBrush(Color.Black), (float)customer.Point.X, (float)customer.Point.Y);
             }
 
             textBox1.Text = _vrpData.Customers.Length.ToString();
+            tbTotalLength.Text = _vrpResult.Routes.Sum(r => GetLength(r.Count - 1, _vrpData.Customers.Select(c => c.Point), r)).ToString();
 
             bitmapPanel.Refresh();
         }

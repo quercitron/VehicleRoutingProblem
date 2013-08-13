@@ -19,7 +19,7 @@ namespace VrpLauncher
 
             var data = VrpData.ReadData(path);
 
-            var solver = new SimpleVrpSolver();
+            var solver = new VrpClusteringMethod();
 
             var result = solver.Solve(data);
 
