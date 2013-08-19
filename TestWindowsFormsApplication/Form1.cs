@@ -50,9 +50,9 @@ namespace TestWindowsFormsApplication
             bitmapPanel.Refresh();*/
         }
 
-        private void DrawPoint(double x, double y, Graphics g, int r = 4)
+        private void DrawPoint(double x, double y, Color color, Graphics g, int r = 4)
         {
-            g.FillEllipse(new SolidBrush(Color.Red), (float)(x - r), (float) (y - r), 2 * r, 2 * r);
+            g.FillEllipse(new SolidBrush(color), (float)(x - r), (float) (y - r), 2 * r, 2 * r);
         }
 
         private void bitmapPanel_Paint(object sender, PaintEventArgs e)
@@ -79,6 +79,11 @@ namespace TestWindowsFormsApplication
 
         private void RefreshDraw()
         {
+            if (_vrpData == null)
+            {
+                return;
+            }
+
             m_Bitmap = new Bitmap(m_Width, m_Height);
             var g = Graphics.FromImage(m_Bitmap);
 
@@ -100,12 +105,13 @@ namespace TestWindowsFormsApplication
             double maxDemand = Math.Sqrt(_vrpData.Customers.Max(c => c.Demand));
             foreach (var customer in _vrpData.Customers)
             {
-                DrawPoint(customer.Point.X, customer.Point.Y, g, (int)(10 * Math.Sqrt(customer.Demand) / maxDemand) + 1);
-                if (customer.Demand == 0)
+                var radius = (int) (10 * Math.Sqrt(customer.Demand) / maxDemand) + 1;
+                //DrawPoint(customer.Point.X, customer.Point.Y, Color.Black, g, radius + 2);
+                DrawPoint(customer.Point.X, customer.Point.Y, Color.Red, g, radius);
+                if (cbShowDemand.Checked && customer.Demand != 0)
                 {
-                    continue;
+                    g.DrawString(customer.Demand.ToString(), new Font("Arial", 16), new SolidBrush(Color.Black), (float)customer.Point.X, (float)customer.Point.Y);
                 }
-                g.DrawString(customer.Demand.ToString(), new Font("Arial", 16), new SolidBrush(Color.Black), (float)customer.Point.X, (float)customer.Point.Y);
             }
 
             textBox1.Text = _vrpData.Customers.Length.ToString();
@@ -188,6 +194,11 @@ namespace TestWindowsFormsApplication
             }
 
             GetPath();
+            RefreshDraw();
+        }
+
+        private void cbShowDemand_CheckedChanged(object sender, EventArgs e)
+        {
             RefreshDraw();
         }
     }

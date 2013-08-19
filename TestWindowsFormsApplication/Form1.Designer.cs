@@ -34,11 +34,10 @@
             this.buttonReset = new System.Windows.Forms.Button();
             this.buttonAddPoints = new System.Windows.Forms.Button();
             this.numericPoints = new System.Windows.Forms.NumericUpDown();
-            this.solversPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonUpload = new System.Windows.Forms.Button();
             this.tbTotalLength = new System.Windows.Forms.TextBox();
+            this.cbShowDemand = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.numericPoints)).BeginInit();
-            this.solversPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // bitmapPanel
@@ -110,15 +109,6 @@
             0,
             0});
             // 
-            // solversPanel
-            // 
-            this.solversPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.solversPanel.Controls.Add(this.tbTotalLength);
-            this.solversPanel.Location = new System.Drawing.Point(1238, 151);
-            this.solversPanel.Name = "solversPanel";
-            this.solversPanel.Size = new System.Drawing.Size(134, 450);
-            this.solversPanel.TabIndex = 6;
-            // 
             // buttonUpload
             // 
             this.buttonUpload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -133,18 +123,31 @@
             // tbTotalLength
             // 
             this.tbTotalLength.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbTotalLength.Location = new System.Drawing.Point(3, 3);
+            this.tbTotalLength.Location = new System.Drawing.Point(1272, 151);
             this.tbTotalLength.Name = "tbTotalLength";
             this.tbTotalLength.Size = new System.Drawing.Size(100, 20);
             this.tbTotalLength.TabIndex = 8;
+            // 
+            // cbShowDemand
+            // 
+            this.cbShowDemand.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbShowDemand.AutoSize = true;
+            this.cbShowDemand.Location = new System.Drawing.Point(1272, 177);
+            this.cbShowDemand.Name = "cbShowDemand";
+            this.cbShowDemand.Size = new System.Drawing.Size(96, 17);
+            this.cbShowDemand.TabIndex = 9;
+            this.cbShowDemand.Text = "Show Demand";
+            this.cbShowDemand.UseVisualStyleBackColor = true;
+            this.cbShowDemand.CheckedChanged += new System.EventHandler(this.cbShowDemand_CheckedChanged);
             // 
             // TestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1384, 962);
+            this.Controls.Add(this.cbShowDemand);
+            this.Controls.Add(this.tbTotalLength);
             this.Controls.Add(this.buttonUpload);
-            this.Controls.Add(this.solversPanel);
             this.Controls.Add(this.numericPoints);
             this.Controls.Add(this.buttonAddPoints);
             this.Controls.Add(this.buttonReset);
@@ -155,8 +158,6 @@
             this.Text = "Test App";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             ((System.ComponentModel.ISupportInitialize)(this.numericPoints)).EndInit();
-            this.solversPanel.ResumeLayout(false);
-            this.solversPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -170,9 +171,9 @@
         private System.Windows.Forms.Button buttonReset;
         private System.Windows.Forms.Button buttonAddPoints;
         private System.Windows.Forms.NumericUpDown numericPoints;
-        private System.Windows.Forms.FlowLayoutPanel solversPanel;
         private System.Windows.Forms.Button buttonUpload;
         private System.Windows.Forms.TextBox tbTotalLength;
+        private System.Windows.Forms.CheckBox cbShowDemand;
     }
 }
 
